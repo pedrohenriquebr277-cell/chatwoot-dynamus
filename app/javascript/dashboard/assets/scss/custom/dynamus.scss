@@ -1,0 +1,57 @@
+
+:root {
+  --dynamus-purple: #6d4aff;
+  --dynamus-purple-dark: #4f2fd6;
+  --dynamus-purple-soft: #eee9ff;
+  --dynamus-border: #e7e3f5;
+}
+
+/* Cor principal */
+.bg-woot-500,
+.bg-n-brand,
+button.bg-n-brand {
+  background: linear-gradient(135deg, #7b5cff, #4f2fd6) !important;
+}
+
+/* Links e textos roxos */
+.text-woot-500,
+.text-n-brand,
+a {
+  color: var(--dynamus-purple-dark) !important;
+}
+
+/* Botões principais */
+button,
+.button {
+  border-radius: 10px;
+}
+
+/* Selecionados / ativos */
+.router-link-active,
+.active,
+.bg-n-brand\/10 {
+  background-color: var(--dynamus-purple-soft) !important;
+  color: var(--dynamus-purple-dark) !important;
+}
+
+/* Badges */
+.rounded-full,
+.badge {
+  background-color: var(--dynamus-purple) !important;
+}
+
+/* Balão de mensagem enviada */
+.message-bubble.outgoing,
+.outgoing {
+  background: linear-gradient(135deg, #efe9ff, #e4dcff) !important;
+  color: #351b8f !important;
+  border: 1px solid #d8ccff !important;
+}
+
+/* Cards e painéis */
+.card,
+.panel,
+.conversation-card {
+  border-color: var(--dynamus-border) !important;
+  border-radius: 14px !important;
+}
