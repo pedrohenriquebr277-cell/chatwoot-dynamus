@@ -1,16 +1,23 @@
 <script setup>
-import { useAttrs } from 'vue';
+import { useAttrs, computed } from 'vue';
 import { useMapGetter } from 'dashboard/composables/store';
 
 const attrs = useAttrs();
 const globalConfig = useMapGetter('globalConfig/get');
 
 const defaultLogo = '/brand-assets/logo-thumbnail.png';
+const logoUrl = computed(() => {
+  const configLogo = globalConfig.value.logoThumbnail;
+  if (!configLogo || configLogo.includes('.svg')) {
+    return defaultLogo;
+  }
+  return configLogo;
+});
 </script>
 
 <template>
   <img
     v-bind="attrs"
-    :src="globalConfig.logoThumbnail || defaultLogo"
+    :src="logoUrl"
   />
 </template>
