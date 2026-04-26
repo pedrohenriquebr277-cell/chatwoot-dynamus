@@ -535,3 +535,11 @@ export default {
     </div>
   </div>
 </template>
+
+<style scoped>
+.conversation-panel {
+  background-image: var(--chat-background-pattern);
+  background-repeat: repeat;
+  background-attachment: local;
+}
+</style>

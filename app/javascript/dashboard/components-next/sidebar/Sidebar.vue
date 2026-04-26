@@ -10,6 +10,9 @@ import { useSidebarKeyboardShortcuts } from './useSidebarKeyboardShortcuts';
 import { vOnClickOutside } from '@vueuse/components';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import { useWindowSize, useEventListener } from '@vueuse/core';
+import { LocalStorage } from 'shared/helpers/localStorage';
+import { LOCAL_STORAGE_KEYS } from 'dashboard/constants/localStorage';
+import { setColorTheme } from 'dashboard/helper/themeHelper';
 
 import Button from 'dashboard/components-next/button/Button.vue';
 import SidebarGroup from './SidebarGroup.vue';
@@ -75,6 +78,15 @@ const expandedItem = ref(null);
 
 const setExpandedItem = name => {
   expandedItem.value = expandedItem.value === name ? null : name;
+};
+
+// Theme toggle
+const isDarkMode = ref(document.body.classList.contains('dark'));
+const toggleTheme = () => {
+  const newScheme = isDarkMode.value ? 'light' : 'dark';
+  LocalStorage.set(LOCAL_STORAGE_KEYS.COLOR_SCHEME, newScheme);
+  setColorTheme(false);
+  isDarkMode.value = document.body.classList.contains('dark');
 };
 
 const {
@@ -622,8 +634,8 @@ const menuItems = computed(() => {
           />
         </template>
         <template v-else>
-          <div class="grid flex-shrink-0 place-content-center size-6">
-            <Logo class="size-4" />
+          <div class="grid flex-shrink-0 place-content-center size-8">
+            <Logo class="size-6" />
           </div>
           <div class="flex-shrink-0 w-px h-3 bg-n-strong" />
           <SidebarAccountSwitcher
@@ -690,6 +702,22 @@ const menuItems = computed(() => {
           :key="item.name"
           v-bind="item"
         />
+        <!-- Theme toggle button -->
+        <li class="list-none min-w-0">
+          <button
+            class="flex h-8 w-full items-center gap-2 px-1.5 py-1 rounded-lg text-n-slate-11 hover:bg-n-alpha-2 transition-colors"
+            :title="isDarkMode ? 'Mudar para Tema Claro' : 'Mudar para Tema Escuro'"
+            @click="toggleTheme"
+          >
+            <span
+              class="size-4 flex-shrink-0"
+              :class="isDarkMode ? 'i-lucide-sun' : 'i-lucide-moon'"
+            />
+            <span v-if="!isEffectivelyCollapsed" class="truncate text-sm">
+              {{ isDarkMode ? 'Tema Claro' : 'Tema Escuro' }}
+            </span>
+          </button>
+        </li>
       </ul>
     </nav>
     <section
