@@ -711,9 +711,8 @@ function handleLineBreakWhenCmdAndEnterToSendEnabled(event) {
 }
 
 function onKeydown(event) {
-  if (event.ctrlKey && event.key === 'Enter') {
+  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
     event.preventDefault();
-    event.stopPropagation();
     return;
   }
 
