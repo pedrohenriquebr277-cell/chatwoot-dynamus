@@ -711,17 +711,20 @@ function handleLineBreakWhenCmdAndEnterToSendEnabled(event) {
 }
 
 function onKeydown(event) {
-  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-    event.preventDefault();
-    return;
-  }
-
-  if (isEnterToSendEnabled()) {
-    handleLineBreakWhenEnterToSendEnabled(event);
-  }
-
+  // Se o atalho "Cmd/Ctrl+Enter para enviar" estiver ativo:
+  // Previne a quebra de linha do editor, e deixa o evento subir para o ReplyBox enviar a mensagem.
   if (isCmdPlusEnterToSendEnabled()) {
-    handleLineBreakWhenCmdAndEnterToSendEnabled(event);
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter' && !props.overrideLineBreaks) {
+      event.preventDefault();
+    }
+  }
+
+  // Se o atalho "Enter para enviar" estiver ativo:
+  // Previne a quebra de linha no Enter puro, mas permite Shift+Enter ou Ctrl+Enter quebrarem linha.
+  if (isEnterToSendEnabled()) {
+    if (event.key === 'Enter' && !event.ctrlKey && !event.metaKey && !event.shiftKey && !props.overrideLineBreaks) {
+      event.preventDefault();
+    }
   }
 }
 
