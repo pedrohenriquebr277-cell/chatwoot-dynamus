@@ -69,8 +69,8 @@ const statusTooltip = computed(() => {
     ></span>
   </div>
   <div class="flex-1 flex flex-col justify-center min-w-0">
-    <div class="truncate text-sm leading-tight" :title="parsedLabel.base">{{ parsedLabel.base }}</div>
-    <div v-if="parsedLabel.number" class="truncate text-[10px] text-n-slate-10 font-mono tracking-wide" :title="parsedLabel.number">
+    <div class="truncate text-sm leading-none" :title="parsedLabel.base">{{ parsedLabel.base }}</div>
+    <div v-if="parsedLabel.number" class="truncate text-[10px] text-n-slate-10 font-mono tracking-wide -mt-1" :title="parsedLabel.number">
       {{ parsedLabel.number }}
     </div>
   </div>
