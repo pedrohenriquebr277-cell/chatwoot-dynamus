@@ -186,7 +186,9 @@ onMounted(() => {
 });
 
 const sortedInboxes = computed(() =>
-  inboxes.value.slice().sort((a, b) => a.name.localeCompare(b.name))
+  inboxes.value.slice().sort((a, b) => 
+    a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' })
+  )
 );
 
 const closeMobileSidebar = () => {
@@ -443,6 +445,26 @@ const menuItems = computed(() => {
       to: accountScopedRoute('canned_list'),
     },
     {
+      name: 'Inboxes',
+      label: t('SIDEBAR.INBOXES'),
+      icon: 'i-lucide-inbox',
+      activeOn: [
+        'settings_inbox_list',
+        'settings_inbox_show',
+        'settings_inbox_new',
+        'settings_inbox_finish',
+        'settings_inboxes_page_channel',
+        'settings_inboxes_add_agents',
+      ],
+      to: accountScopedRoute('settings_inbox_list'),
+    },
+    {
+      name: 'Labels',
+      label: t('SIDEBAR.LABELS'),
+      icon: 'i-lucide-tags',
+      to: accountScopedRoute('labels_list'),
+    },
+    {
       name: 'Settings',
       label: t('SIDEBAR.SETTINGS'),
       icon: 'i-lucide-bolt',
@@ -500,26 +522,7 @@ const menuItems = computed(() => {
               },
             ]
           : []),
-        {
-          name: 'Settings Inboxes',
-          label: t('SIDEBAR.INBOXES'),
-          icon: 'i-lucide-inbox',
-          activeOn: [
-            'settings_inbox_list',
-            'settings_inbox_show',
-            'settings_inbox_new',
-            'settings_inbox_finish',
-            'settings_inboxes_page_channel',
-            'settings_inboxes_add_agents',
-          ],
-          to: accountScopedRoute('settings_inbox_list'),
-        },
-        {
-          name: 'Settings Labels',
-          label: t('SIDEBAR.LABELS'),
-          icon: 'i-lucide-tags',
-          to: accountScopedRoute('labels_list'),
-        },
+
         {
           name: 'Settings Custom Attributes',
           label: t('SIDEBAR.CUSTOM_ATTRIBUTES'),

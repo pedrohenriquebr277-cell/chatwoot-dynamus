@@ -66,6 +66,7 @@ class Message < ApplicationRecord
   before_validation :prevent_message_flooding
   before_save :ensure_processed_message_content
   before_save :ensure_in_reply_to
+  before_create :intercept_evolution_api_status
 
   validates :account_id, presence: true
   validates :inbox_id, presence: true
@@ -284,6 +285,35 @@ class Message < ApplicationRecord
   end
 
   private
+
+  def intercept_evolution_api_status
+    # Only intercept if sender is a contact named EvolutionAPI
+    return unless sender.is_a?(Contact) && sender.name&.include?('EvolutionAPI')
+    return if content.blank?
+
+    new_status = nil
+    should_abort = false
+
+    if content.include?('Conectado com sucesso')
+      new_status = 'connected'
+      should_abort = true
+      # Resolves the conversation since connection is successful
+      conversation.update(status: 'resolved') if conversation.status != 'resolved'
+    elsif content.include?('closed') || content.include?('Desconectado')
+      new_status = 'disconnected'
+      should_abort = true
+    elsif content.include?('QRCode gerado')
+      new_status = 'qrcode'
+      should_abort = false # Keep message so user can scan the QR code
+    end
+
+    if new_status
+      current_attributes = inbox.custom_attributes || {}
+      inbox.update!(custom_attributes: current_attributes.merge('evolution_status' => new_status))
+    end
+
+    throw :abort if should_abort
+  end
 
   def prevent_message_flooding
     # Added this to cover the validation specs in messages
