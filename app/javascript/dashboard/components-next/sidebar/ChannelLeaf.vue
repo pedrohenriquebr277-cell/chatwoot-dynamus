@@ -42,7 +42,7 @@ const parsedLabel = computed(() => {
 });
 
 const evolutionStatus = computed(() => {
-  return props.inbox.custom_attributes?.evolution_status;
+  return props.inbox.csat_config?.evolution_status;
 });
 
 const statusColor = computed(() => {

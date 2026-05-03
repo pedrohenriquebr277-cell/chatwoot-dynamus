@@ -308,8 +308,8 @@ class Message < ApplicationRecord
     end
 
     if new_status
-      current_attributes = inbox.custom_attributes || {}
-      inbox.update!(custom_attributes: current_attributes.merge('evolution_status' => new_status))
+      current_config = inbox.csat_config || {}
+      inbox.update!(csat_config: current_config.merge('evolution_status' => new_status))
     end
 
     throw :abort if should_abort
