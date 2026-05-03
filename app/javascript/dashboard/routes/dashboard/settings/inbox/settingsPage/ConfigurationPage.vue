@@ -1,5 +1,6 @@
 <script>
 import { useAlert } from 'dashboard/composables';
+import { mapGetters } from 'vuex';
 import inboxMixin from 'shared/mixins/inboxMixin';
 import SettingsFieldSection from 'dashboard/components-next/Settings/SettingsFieldSection.vue';
 import SettingsToggleSection from 'dashboard/components-next/Settings/SettingsToggleSection.vue';
@@ -44,6 +45,8 @@ export default {
       allowedDomains: '',
       isUpdatingAllowedDomains: false,
       isSettingDefaults: false,
+      evolutionInstance: '',
+      isUpdatingEvolutionInstance: false,
     };
   },
   validations: {
@@ -58,6 +61,12 @@ export default {
     },
     isForwardingEnabled() {
       return !!this.inbox.forwarding_enabled;
+    },
+    ...mapGetters({
+      currentUser: 'getCurrentUser',
+    }),
+    isAdmin() {
+      return this.currentUser && this.currentUser.role === 'administrator';
     },
   },
   watch: {
@@ -83,6 +92,8 @@ export default {
         this.inbox.selected_feature_flags || []
       ).includes('allow_mobile_webview');
       this.allowedDomains = this.inbox.allowed_domains || '';
+      this.evolutionInstance =
+        this.inbox.channel.additional_attributes?.evolution_instance || '';
       this.$nextTick(() => {
         this.isSettingDefaults = false;
       });
@@ -182,6 +193,27 @@ export default {
         useAlert(this.$t('INBOX_MGMT.EDIT.API.ERROR_MESSAGE'));
       } finally {
         this.isSyncingTemplates = false;
+      }
+    },
+    async updateEvolutionInstance() {
+      this.isUpdatingEvolutionInstance = true;
+      try {
+        const payload = {
+          id: this.inbox.id,
+          formData: false,
+          channel: {
+            additional_attributes: {
+              ...(this.inbox.channel.additional_attributes || {}),
+              evolution_instance: this.evolutionInstance,
+            },
+          },
+        };
+        await this.$store.dispatch('inboxes/updateInbox', payload);
+        useAlert(this.$t('INBOX_MGMT.EDIT.API.SUCCESS_MESSAGE'));
+      } catch (error) {
+        useAlert(this.$t('INBOX_MGMT.EDIT.API.ERROR_MESSAGE'));
+      } finally {
+        this.isUpdatingEvolutionInstance = false;
       }
     },
   },
@@ -345,6 +377,27 @@ export default {
         <label for="hmacMandatory" class="text-body-main text-n-slate-12">
           {{ $t('INBOX_MGMT.EDIT.ENABLE_HMAC.LABEL') }}
         </label>
+      </div>
+    </SettingsFieldSection>
+
+    <SettingsFieldSection
+      v-if="isAdmin"
+      label="Instância Evolution API"
+      help-text="Nome da instância na Evolution API para este canal. Se preenchido, será usado para enviar mensagens ativas."
+    >
+      <div class="flex gap-2 items-center">
+        <woot-input
+          v-model="evolutionInstance"
+          type="text"
+          class="flex-1 mr-2 [&>input]:!mb-0"
+          placeholder="Ex: minha-instancia-n1"
+        />
+        <NextButton
+          :is-loading="isUpdatingEvolutionInstance"
+          @click="updateEvolutionInstance"
+        >
+          {{ $t('INBOX_MGMT.SETTINGS_POPUP.UPDATE') }}
+        </NextButton>
       </div>
     </SettingsFieldSection>
   </div>

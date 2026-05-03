@@ -24,6 +24,7 @@ const emit = defineEmits([
   'resetFilters',
   'basicFilterChange',
   'filtersModal',
+  'openEvolutionModal',
 ]);
 
 const { uiSettings, updateUISettings } = useUISettings();
@@ -162,6 +163,14 @@ const toggleConversationLayout = () => {
       <SwitchLayout
         :is-on-expanded-layout="isOnExpandedLayout"
         @toggle="toggleConversationLayout"
+      />
+      <NextButton
+        v-tooltip.bottom="'Iniciar conversa via WhatsApp'"
+        icon="i-lucide-message-circle-plus"
+        slate
+        xs
+        faded
+        @click="emit('openEvolutionModal')"
       />
     </div>
   </div>

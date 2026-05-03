@@ -17,6 +17,7 @@ import DeleteCustomViews from 'dashboard/routes/dashboard/customviews/DeleteCust
 import ConversationBulkActions from './widgets/conversation/conversationBulkActions/Index.vue';
 import TeleportWithDirection from 'dashboard/components-next/TeleportWithDirection.vue';
 import ConversationResolveAttributesModal from 'dashboard/components-next/ConversationWorkflow/ConversationResolveAttributesModal.vue';
+import NewEvolutionConversationModal from './widgets/conversation/NewEvolutionConversationModal.vue';
 
 import { useUISettings } from 'dashboard/composables/useUISettings';
 import { useAlert } from 'dashboard/composables';
@@ -71,6 +72,7 @@ const route = useRoute();
 const store = useStore();
 
 const resolveAttributesModalRef = ref(null);
+const showEvolutionModal = ref(false);
 
 const activeAssigneeTab = ref(wootConstants.ASSIGNEE_TYPE.ME);
 const activeStatus = ref(wootConstants.STATUS_TYPE.OPEN);
@@ -427,6 +429,10 @@ function onUpdateSavedFilter(payload, folderName) {
 
 function onClickOpenAddFoldersModal() {
   showAddFoldersModal.value = true;
+}
+
+function openEvolutionModal() {
+  showEvolutionModal.value = true;
 }
 
 function onCloseAddFoldersModal() {
@@ -886,6 +892,7 @@ watch(conversationFilters, (newVal, oldVal) => {
       @filters-modal="onToggleAdvanceFiltersModal"
       @reset-filters="resetAndFetchData"
       @basic-filter-change="onBasicFilterChange"
+      @open-evolution-modal="openEvolutionModal"
     />
 
     <TeleportWithDirection
@@ -979,5 +986,9 @@ watch(conversationFilters, (newVal, oldVal) => {
       ref="resolveAttributesModalRef"
       @submit="handleResolveWithAttributes"
     />
+
+    <woot-modal v-model:show="showEvolutionModal" :on-close="() => (showEvolutionModal = false)">
+      <NewEvolutionConversationModal @close="showEvolutionModal = false" />
+    </woot-modal>
   </div>
 </template>
