@@ -446,8 +446,8 @@ const menuItems = computed(() => {
     },
     {
       name: 'Inboxes',
-      label: t('SIDEBAR.INBOXES'),
-      icon: 'i-lucide-inbox',
+      label: 'Canais de Entrada',
+      icon: 'i-lucide-mailbox',
       activeOn: [
         'settings_inbox_list',
         'settings_inbox_show',
