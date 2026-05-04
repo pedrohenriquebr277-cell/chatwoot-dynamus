@@ -23,7 +23,7 @@ class Channel::Api < ApplicationRecord
   include Channelable
 
   self.table_name = 'channel_api'
-  EDITABLE_ATTRS = [:webhook_url, :hmac_mandatory, { additional_attributes: {} }].freeze
+  EDITABLE_ATTRS = [:webhook_url, :hmac_mandatory, { additional_attributes: [:evolution_instance, :agent_reply_time_window] }].freeze
 
   has_secure_token :identifier
   has_secure_token :hmac_token

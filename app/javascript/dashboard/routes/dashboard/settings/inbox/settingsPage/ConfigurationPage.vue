@@ -105,15 +105,14 @@ export default {
       try {
         const payload = {
           id: this.inbox.id,
-          formData: false,
           channel: {
             hmac_mandatory: this.hmacMandatory,
           },
         };
-        await this.$store.dispatch('inboxes/updateInbox', payload);
-        useAlert(this.$t('INBOX_MGMT.EDIT.API.SUCCESS_MESSAGE'));
+        await this.$store.dispatch('inboxes/update', payload);
+        useAlert(this.$t('INBOX_MGMT.EDIT.ALERTS.UPDATE_SUCCESS'));
       } catch (error) {
-        useAlert(this.$t('INBOX_MGMT.EDIT.API.ERROR_MESSAGE'));
+        useAlert(this.$t('INBOX_MGMT.EDIT.ALERTS.UPDATE_ERROR'));
       }
     },
     async handleMobileWebviewFlag() {
@@ -208,10 +207,10 @@ export default {
             },
           },
         };
-        await this.$store.dispatch('inboxes/updateInbox', payload);
-        useAlert(this.$t('INBOX_MGMT.EDIT.API.SUCCESS_MESSAGE'));
+        await this.$store.dispatch('inboxes/update', payload);
+        useAlert(this.$t('INBOX_MGMT.EDIT.ALERTS.UPDATE_SUCCESS'));
       } catch (error) {
-        useAlert(this.$t('INBOX_MGMT.EDIT.API.ERROR_MESSAGE'));
+        useAlert(this.$t('INBOX_MGMT.EDIT.ALERTS.UPDATE_ERROR'));
       } finally {
         this.isUpdatingEvolutionInstance = false;
       }

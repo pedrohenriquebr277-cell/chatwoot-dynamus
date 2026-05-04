@@ -61,34 +61,39 @@ const statusTooltip = computed(() => {
 </script>
 
 <template>
-  <div class="relative size-4 flex-shrink-0 grid place-content-center rounded-full">
-    <ChannelIcon :inbox="inbox" class="size-4" />
-    <span v-if="statusColor" 
-          :class="['absolute -bottom-[2px] -right-[2px] size-2 rounded-full border border-n-background', statusColor]"
-          v-tooltip.top-end="statusTooltip"
-    ></span>
-  </div>
-  <div class="flex-1 flex flex-col justify-center min-w-0">
-    <div
-      class="truncate text-sm"
-      :class="parsedLabel.number ? 'leading-none' : 'leading-tight'"
-      :title="parsedLabel.base"
-    >
-      {{ parsedLabel.base }}
+  <div class="flex items-start gap-2.5 w-full min-w-0 pt-0.5">
+    <div class="relative size-4 flex-shrink-0 mt-0.5 grid place-content-center rounded-full">
+      <ChannelIcon :inbox="inbox" class="size-4" />
+      <span
+        v-if="statusColor"
+        :class="[
+          'absolute -bottom-[2px] -right-[2px] size-2 rounded-full border border-n-background',
+          statusColor,
+        ]"
+        v-tooltip.top-end="statusTooltip"
+      ></span>
+    </div>
+    <div class="flex-1 flex flex-col justify-center min-w-0">
+      <div
+        class="truncate text-sm font-medium text-n-slate-12 leading-tight"
+        :title="parsedLabel.base"
+      >
+        {{ parsedLabel.base }}
+      </div>
+      <div
+        v-if="parsedLabel.number"
+        class="truncate text-[10px] text-n-slate-10 font-mono tracking-wide mt-0.5 leading-none"
+        :title="parsedLabel.number"
+      >
+        {{ parsedLabel.number }}
+      </div>
     </div>
     <div
-      v-if="parsedLabel.number"
-      class="truncate text-[10px] text-n-slate-10 font-mono tracking-wide mt-0.5"
-      :title="parsedLabel.number"
+      v-if="reauthorizationRequired"
+      v-tooltip.top-end="$t('SIDEBAR.REAUTHORIZE')"
+      class="flex-shrink-0 grid place-content-center size-5 bg-n-ruby-5/60 rounded-full ml-1"
     >
-      {{ parsedLabel.number }}
+      <Icon icon="i-woot-alert" class="size-3 text-n-ruby-9" />
     </div>
-  </div>
-  <div
-    v-if="reauthorizationRequired"
-    v-tooltip.top-end="$t('SIDEBAR.REAUTHORIZE')"
-    class="flex-shrink-0 grid place-content-center size-5 bg-n-ruby-5/60 rounded-full ml-1"
-  >
-    <Icon icon="i-woot-alert" class="size-3 text-n-ruby-9" />
   </div>
 </template>

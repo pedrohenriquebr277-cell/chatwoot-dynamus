@@ -48,7 +48,7 @@ export default {
           :style="{ backgroundColor: color }"
         />
         <span
-          class="overflow-hidden text-ellipsis whitespace-nowrap leading-[1.1]"
+          class="overflow-hidden text-ellipsis whitespace-nowrap leading-[1.1] text-n-slate-12"
           :title="title"
         >
           {{ title }}
