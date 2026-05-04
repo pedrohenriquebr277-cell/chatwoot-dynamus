@@ -637,8 +637,8 @@ const menuItems = computed(() => {
           />
         </template>
         <template v-else>
-          <div class="grid flex-shrink-0 place-content-center size-10">
-            <Logo class="size-8" />
+          <div class="flex flex-shrink-0 items-center h-10 px-1">
+            <Logo class="h-8 w-auto max-w-[120px] object-contain" />
           </div>
           <div class="flex-shrink-0 w-px h-3 bg-n-strong" />
           <SidebarAccountSwitcher

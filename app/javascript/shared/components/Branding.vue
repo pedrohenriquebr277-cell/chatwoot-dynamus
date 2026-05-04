@@ -50,7 +50,7 @@ export default {
     logoUrl() {
       const configLogo = this.globalConfig.logoThumbnail;
       const defaultLogo = '/brand-assets/logo-thumbnail.png';
-      if (!configLogo || configLogo.includes('.svg')) {
+      if (!configLogo) {
         return defaultLogo;
       }
       return configLogo;

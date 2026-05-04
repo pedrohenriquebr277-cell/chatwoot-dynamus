@@ -8,7 +8,7 @@ const globalConfig = useMapGetter('globalConfig/get');
 const defaultLogo = '/brand-assets/logo-thumbnail.png';
 const logoUrl = computed(() => {
   const configLogo = globalConfig.value.logoThumbnail;
-  if (!configLogo || configLogo.includes('.svg')) {
+  if (!configLogo) {
     return defaultLogo;
   }
   return configLogo;
