@@ -13,7 +13,14 @@ class EvolutionApiMessageService
     validate_credentials!
     
     instance_name = resolve_instance_name
+    Rails.logger.info "[EvolutionService] Using instance: #{instance_name}"
     raise StandardError, 'A Caixa de Entrada (Inbox) não tem uma instância Evolution configurada.' if instance_name.blank?
+
+    payload = {
+      number: format_number_for_evolution(@phone_number),
+      text: @message
+    }
+    Rails.logger.info "[EvolutionService] Sending to instance #{instance_name} | TextLen: #{@message&.length || 0}"
 
     response = self.class.post(
       "#{@base_url}/message/sendText/#{instance_name}",
@@ -21,10 +28,7 @@ class EvolutionApiMessageService
         'Content-Type' => 'application/json',
         'apikey' => @api_key
       },
-      body: {
-        number: format_number_for_evolution(@phone_number),
-        text: @message
-      }.to_json
+      body: payload.to_json
     )
 
     unless response.success?

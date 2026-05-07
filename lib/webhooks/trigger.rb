@@ -25,20 +25,33 @@ class Webhooks::Trigger
 
   def handle_failure(error)
     handle_error(error)
-    Rails.logger.warn "Exception: Invalid webhook URL #{@url} : #{error.message}"
+    Rails.logger.error "[Webhook] Failure: Invalid webhook URL #{@url} : #{error.message}"
+    if error.respond_to?(:response) && error.response.present?
+      msg_id = @payload.dig(:id) || @payload.dig('id')
+      error_msg = error.is_a?(RestClient::ExceptionWithResponse) ? "HTTP #{error.response&.code}: #{error.response&.body&.slice(0, 200)}" : error.message
+      Rails.logger.error "[Webhook] Failure | MsgID: #{msg_id} | Invalid URL #{@url} : #{error_msg}"
+    end
   end
-
   private
 
   def perform_request
+    msg_id = @payload.dig(:id) || @payload.dig('id')
+    conv_id = @payload.dig(:conversation, :id) || @payload.dig('conversation', 'id')
+    event_type = @payload.dig(:event) || @payload.dig('event')
+    content_length = @payload.dig(:content)&.length || 0
+
+    Rails.logger.info "[Webhook] Sending #{event_type} to #{@url} | MsgID: #{msg_id} | ConvID: #{conv_id} | ContentLen: #{content_length}"
+
     body = @payload.to_json
-    RestClient::Request.execute(
+    response = RestClient::Request.execute(
       method: :post,
       url: @url,
       payload: body,
       headers: request_headers(body),
       timeout: webhook_timeout
     )
+    Rails.logger.info "[Webhook] Success | MsgID: #{msg_id} | HTTP: #{response.code}"
+    response
   end
 
   def request_headers(body)
@@ -106,6 +119,9 @@ class Webhooks::Trigger
   end
 
   def webhook_timeout
+    env_timeout = ENV.fetch('WEBHOOK_TIMEOUT_SECONDS', nil)&.to_i
+    return env_timeout if env_timeout&.positive?
+
     raw_timeout = GlobalConfig.get_value('WEBHOOK_TIMEOUT')
     timeout = raw_timeout.presence&.to_i
 

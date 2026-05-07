@@ -5,6 +5,8 @@ class Messages::WebhookContentNormalizer
   def self.normalize(text)
     return text if text.blank?
 
-    text.gsub(/\\\r?\n/, "\n")
+    normalized = text.gsub(/\\\r?\n/, "\n")
+    Rails.logger.info "[WebhookNormalizer] Cleaned. BeforeLen: #{text.length}, AfterLen: #{normalized.length}" if text.include?('\\')
+    normalized
   end
 end

@@ -7,9 +7,12 @@ class Conversations::MessageWindowService
   end
 
   def can_reply?
-    return true if messaging_window.blank?
-
-    last_message_in_messaging_window?(messaging_window)
+    window = messaging_window
+    result = window.blank? || last_message_in_messaging_window?(window)
+    if @conversation.inbox.api?
+      Rails.logger.info "[MessageWindow] Inbox: #{@conversation.inbox.id}, Window: #{window.inspect}, Can Reply: #{result}"
+    end
+    result
   end
 
   private
