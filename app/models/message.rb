@@ -287,32 +287,33 @@ class Message < ApplicationRecord
   private
 
   def intercept_evolution_api_status
-    # Only intercept if sender is a contact named EvolutionAPI
-    return unless sender.is_a?(Contact) && sender.name&.include?('EvolutionAPI')
+    # Apenas canais de API (Evolution)
+    return unless inbox.channel_type == 'Channel::Api'
+    # Apenas mensagens recebidas (ignora mensagens enviadas por agentes)
+    return unless message_type == 'incoming'
+    # Mensagens reais de clientes sempre têm source_id (ID do WhatsApp). Mensagens de sistema da Evolution não têm.
+    return if source_id.present?
     return if content.blank?
 
     new_status = nil
-    should_abort = false
 
-    if content.include?('Conectado com sucesso')
+    if content.match?(/Conectado com sucesso|Connected/i)
       new_status = 'connected'
-      should_abort = true
-      # Resolves the conversation since connection is successful
+      # Resolve a conversa automaticamente quando conecta com sucesso
       conversation.update(status: 'resolved') if conversation.status != 'resolved'
-    elsif content.include?('closed') || content.include?('Desconectado')
+    elsif content.match?(/closed|Desconectado|Disconnected/i) && content.length < 50
       new_status = 'disconnected'
-      should_abort = true
-    elsif content.include?('QRCode gerado')
+    elsif content.match?(/QRCode gerado|QR Code/i)
       new_status = 'qrcode'
-      should_abort = false # Keep message so user can scan the QR code
     end
 
     if new_status
       current_config = inbox.csat_config || {}
       inbox.update!(csat_config: current_config.merge('evolution_status' => new_status))
+      
+      # Aborta a criação da mensagem no banco de dados para manter o chat limpo
+      throw :abort
     end
-
-    throw :abort if should_abort
   end
 
   def prevent_message_flooding
