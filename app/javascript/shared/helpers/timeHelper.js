@@ -4,7 +4,42 @@ import {
   fromUnixTime,
   formatDistanceToNow,
   differenceInDays,
+  isToday,
+  isYesterday,
+  differenceInCalendarDays,
+  getDay,
 } from 'date-fns';
+
+/**
+ * Formats conversation date according to business rules:
+ * - Today: HH:mm
+ * - Yesterday: "ontem"
+ * - Up to a week (2-6 days): short day of week (seg, ter...)
+ * - Older: dd/MM/yyyy
+ * @param {number} time - Unix timestamp
+ * @returns {string} Formatted date string
+ */
+export const formatConversationDate = time => {
+  if (!time) return '';
+  const date = fromUnixTime(time);
+  const now = new Date();
+
+  if (isToday(date)) {
+    return format(date, 'HH:mm');
+  }
+
+  if (isYesterday(date)) {
+    return 'ontem';
+  }
+
+  const diffDays = differenceInCalendarDays(now, date);
+  if (diffDays >= 2 && diffDays <= 6) {
+    const days = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
+    return days[getDay(date)];
+  }
+
+  return format(date, 'dd/MM/yyyy');
+};
 
 /**
  * Formats a Unix timestamp into a human-readable time format.
