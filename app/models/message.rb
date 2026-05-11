@@ -289,7 +289,7 @@ class Message < ApplicationRecord
   def intercept_evolution_api_status
     # Apenas canais de API (Evolution)
     return unless inbox.channel_type == 'Channel::Api'
-    return unless message_type == 'incoming'
+    return unless incoming?
     return if content.blank?
 
     new_status = nil
@@ -303,11 +303,11 @@ class Message < ApplicationRecord
     elsif (content.match?(/closed|Desconectado|Disconnected/i) && content.length < 100) || content.match?(/Instância:.*Desconectado/i)
       new_status = 'disconnected'
     elsif content.match?(/QRCode gerado|QR Code/i)
-      # Usuário pediu para deixar a bolinha amarela sem funcionalidade (oculta)
-      new_status = nil 
+      new_status = nil
     end
 
     if new_status
+      Rails.logger.info "[Evolution] Inbox #{inbox.id} status atualizado para '#{new_status}' via mensagem: #{content.truncate(80)}"
       current_config = inbox.csat_config || {}
       inbox.update!(csat_config: current_config.merge('evolution_status' => new_status))
     end

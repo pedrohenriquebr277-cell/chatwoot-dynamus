@@ -104,6 +104,27 @@ class ActionCableConnector extends BaseActionCableConnector {
       lastActivityAt,
       conversationId,
     });
+
+    // Recarrega inboxes quando mensagem vem de inbox API (Evolution)
+    // para capturar mudanças no evolution_status em tempo real
+    if (data.inbox_id) {
+      const inbox = this.app.$store.getters['inboxes/getInbox'](data.inbox_id);
+      if (inbox && inbox.channel_type === 'Channel::Api') {
+        this.debouncedInboxRefresh();
+      }
+    }
+  };
+
+  // Debounce de 2s para evitar múltiplos requests quando a Evolution
+  // manda várias mensagens de status em sequência
+  debouncedInboxRefresh = () => {
+    if (this._inboxRefreshTimer) {
+      clearTimeout(this._inboxRefreshTimer);
+    }
+    this._inboxRefreshTimer = setTimeout(() => {
+      this.app.$store.dispatch('inboxes/get');
+      this._inboxRefreshTimer = null;
+    }, 2000);
   };
 
   // eslint-disable-next-line class-methods-use-this
