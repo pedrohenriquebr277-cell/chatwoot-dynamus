@@ -48,14 +48,12 @@ const evolutionStatus = computed(() => {
 const statusColor = computed(() => {
   if (evolutionStatus.value === 'connected') return 'bg-[#22c55e]'; // Green
   if (evolutionStatus.value === 'disconnected') return 'bg-[#ef4444]'; // Red
-  if (evolutionStatus.value === 'qrcode') return 'bg-[#f59e0b]'; // Amber
   return null;
 });
 
 const statusTooltip = computed(() => {
   if (evolutionStatus.value === 'connected') return 'Conectado';
   if (evolutionStatus.value === 'disconnected') return 'Desconectado';
-  if (evolutionStatus.value === 'qrcode') return 'Aguardando QR Code';
   return '';
 });
 </script>

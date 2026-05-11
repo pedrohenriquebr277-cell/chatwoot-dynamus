@@ -289,30 +289,27 @@ class Message < ApplicationRecord
   def intercept_evolution_api_status
     # Apenas canais de API (Evolution)
     return unless inbox.channel_type == 'Channel::Api'
-    # Apenas mensagens recebidas (ignora mensagens enviadas por agentes)
     return unless message_type == 'incoming'
-    # Mensagens reais de clientes sempre têm source_id (ID do WhatsApp). Mensagens de sistema da Evolution não têm.
-    return if source_id.present?
     return if content.blank?
 
     new_status = nil
 
-    if content.match?(/Conectado com sucesso|Connected/i)
+    # Padrões comuns de mensagens de sistema da Evolution API
+    # Ex: "Instância: David - Conectado com sucesso", "closed", "QRCode gerado"
+    if content.match?(/Conectado com sucesso|Connected successfully|Instância:.*Conectado/i)
       new_status = 'connected'
       # Resolve a conversa automaticamente quando conecta com sucesso
       conversation.update(status: 'resolved') if conversation.status != 'resolved'
-    elsif content.match?(/closed|Desconectado|Disconnected/i) && content.length < 50
+    elsif (content.match?(/closed|Desconectado|Disconnected/i) && content.length < 100) || content.match?(/Instância:.*Desconectado/i)
       new_status = 'disconnected'
     elsif content.match?(/QRCode gerado|QR Code/i)
-      new_status = 'qrcode'
+      # Usuário pediu para deixar a bolinha amarela sem funcionalidade (oculta)
+      new_status = nil 
     end
 
     if new_status
       current_config = inbox.csat_config || {}
       inbox.update!(csat_config: current_config.merge('evolution_status' => new_status))
-      
-      # Aborta a criação da mensagem no banco de dados para manter o chat limpo
-      throw :abort
     end
   end
 
