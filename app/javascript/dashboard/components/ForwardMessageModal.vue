@@ -156,10 +156,8 @@ const handleOpen = (message) => {
   supportedAttachments.value = [];
   unsupportedAttachmentsCount.value = 0;
 
-  // REMOVED: Auto-selection of current contact
-  // if (message.contact_id) {
-  //   selectedContactIds.value.push(message.contact_id);
-  // }
+  // Auto-selection of current contact removed per user request
+
 
   if (message.attachments && message.attachments.length > 0) {
     message.attachments.forEach(att => {
