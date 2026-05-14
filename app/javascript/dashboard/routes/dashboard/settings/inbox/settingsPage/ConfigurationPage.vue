@@ -93,7 +93,7 @@ export default {
       ).includes('allow_mobile_webview');
       this.allowedDomains = this.inbox.allowed_domains || '';
       this.evolutionInstance =
-        this.inbox.channel.additional_attributes?.evolution_instance || '';
+        this.inbox?.channel?.additional_attributes?.evolution_instance || '';
       this.$nextTick(() => {
         this.isSettingDefaults = false;
       });
@@ -202,7 +202,7 @@ export default {
           formData: false,
           channel: {
             additional_attributes: {
-              ...(this.inbox.channel.additional_attributes || {}),
+              ...(this.inbox?.channel?.additional_attributes || {}),
               evolution_instance: this.evolutionInstance,
             },
           },

@@ -209,7 +209,7 @@ const getInboxForContact = async (contactId) => {
   // Minimal logic to get an inbox for a contact.
   // Reusing fetchContactableInboxes logic from helper.
   try {
-    const { data: { payload: inboxes = [] } } = await store.$api.contacts.getContactableInboxes(contactId);
+    const { data: { payload: inboxes = [] } } = await ContactAPI.getContactableInboxes(contactId);
     
     if (inboxes && inboxes.length > 0) {
       // Prioritize current message's inbox
