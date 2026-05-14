@@ -201,14 +201,13 @@ export default {
           id: this.inbox.id,
           formData: false,
           channel: {
-            type: 'api',
             additional_attributes: {
               ...(this.inbox.channel.additional_attributes || {}),
               evolution_instance: this.evolutionInstance,
             },
           },
         };
-        await this.$store.dispatch('inboxes/update', payload);
+        await this.$store.dispatch('inboxes/updateInbox', payload);
         useAlert(this.$t('INBOX_MGMT.EDIT.ALERTS.UPDATE_SUCCESS'));
       } catch (error) {
         useAlert(this.$t('INBOX_MGMT.EDIT.ALERTS.UPDATE_ERROR'));
