@@ -201,6 +201,7 @@ export default {
           id: this.inbox.id,
           formData: false,
           channel: {
+            type: 'api',
             additional_attributes: {
               ...(this.inbox?.channel?.additional_attributes || {}),
               evolution_instance: this.evolutionInstance,
