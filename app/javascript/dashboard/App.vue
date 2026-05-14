@@ -19,6 +19,7 @@ import {
 } from './helper/pushHelper';
 import ReconnectService from 'dashboard/helper/ReconnectService';
 import { useUISettings } from 'dashboard/composables/useUISettings';
+import ForwardMessageModal from 'dashboard/components/ForwardMessageModal.vue';
 
 export default {
   name: 'App',
@@ -30,6 +31,7 @@ export default {
     PaymentPendingBanner,
     WootSnackbarBox,
     PendingEmailVerificationBanner,
+    ForwardMessageModal,
   },
   setup() {
     const router = useRouter();
@@ -148,6 +150,7 @@ export default {
     </router-view>
     <WootSnackbarBox />
     <NetworkNotification />
+    <ForwardMessageModal />
   </div>
   <LoadingState v-else />
 </template>

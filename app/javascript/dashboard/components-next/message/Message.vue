@@ -361,6 +361,9 @@ const payloadForContextMenu = computed(() => {
     content_attributes: props.contentAttributes,
     content: props.content,
     conversation_id: props.conversationId,
+    inbox_id: props.inboxId,
+    contact_id: store.getters['getConversationById'](props.conversationId)?.meta?.sender?.id,
+    attachments: props.attachments,
   };
 });
 
@@ -439,6 +442,10 @@ function handleReplyTo() {
 
   LocalStorage.updateJsonStore(replyStorageKey, conversationId, replyTo);
   emitter.emit(BUS_EVENTS.TOGGLE_REPLY_TO_MESSAGE, props);
+}
+
+function handleForward(message) {
+  emitter.emit(BUS_EVENTS.SHOW_FORWARD_MESSAGE_MODAL, message);
 }
 
 const avatarInfo = computed(() => {
@@ -582,6 +589,7 @@ provideMessageContext({
         @open="openContextMenu"
         @close="closeContextMenu"
         @reply-to="handleReplyTo"
+        @forward="handleForward"
       />
     </div>
   </div>

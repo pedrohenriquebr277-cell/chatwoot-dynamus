@@ -44,7 +44,7 @@ export default {
       default: false,
     },
   },
-  emits: ['open', 'close', 'replyTo'],
+  emits: ['open', 'close', 'replyTo', 'forward'],
   setup() {
     const { getPlainText } = useMessageFormatter();
 
@@ -133,6 +133,10 @@ export default {
       this.$emit('replyTo', this.message);
       this.handleClose();
     },
+    handleForward() {
+      this.$emit('forward', this.message);
+      this.handleClose();
+    },
     openDeleteModal() {
       this.handleClose();
       this.showDeleteModal = true;
@@ -214,6 +218,15 @@ export default {
           }"
           variant="icon"
           @click.stop="handleCopy"
+        />
+        <MenuItem
+          v-if="enabledOptions['forward'] !== false"
+          :option="{
+            icon: 'share',
+            label: 'Encaminhar',
+          }"
+          variant="icon"
+          @click.stop="handleForward"
         />
         <MenuItem
           v-if="enabledOptions['translate']"
