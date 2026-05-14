@@ -156,22 +156,10 @@ const handleOpen = (message) => {
   supportedAttachments.value = [];
   unsupportedAttachmentsCount.value = 0;
 
-  if (message.contact_id) {
-    selectedContactIds.value.push(message.contact_id);
-    // If current contact is not in pinned or cache, we should fetch it so it displays correctly
-    if (!pinnedContactsCache.value[message.contact_id]) {
-      ContactAPI.show(message.contact_id).then(response => {
-        if (response.data?.payload) {
-          pinnedContactsCache.value[message.contact_id] = response.data.payload;
-          // Temporarily add to pinned display so it shows up before search
-          if (!pinnedContactIds.value.includes(message.contact_id)) {
-            // We just add it to cache, the computed property `displayContacts` won't show it 
-            // unless it's pinned or searched. Let's fix that.
-          }
-        }
-      }).catch(() => {});
-    }
-  }
+  // REMOVED: Auto-selection of current contact
+  // if (message.contact_id) {
+  //   selectedContactIds.value.push(message.contact_id);
+  // }
 
   if (message.attachments && message.attachments.length > 0) {
     message.attachments.forEach(att => {
@@ -348,12 +336,12 @@ onUnmounted(() => {
         <div class="mb-4 relative">
           <input
             type="text"
-            class="w-full border border-n-strong rounded-lg p-2 pl-8 focus:outline-none focus:border-n-brand"
+            class="w-full border border-n-strong rounded-lg p-2 pl-10 focus:outline-none focus:border-n-brand"
             placeholder="Buscar por nome ou número..."
             :value="searchQuery"
             @input="e => onSearch(e.target.value)"
           />
-          <span class="absolute left-3 top-2.5 text-n-slate-11 i-lucide-search" />
+          <span class="absolute left-3.5 top-2.5 text-n-slate-11 i-lucide-search" />
         </div>
 
         <div v-if="isSearching" class="text-center p-4 text-n-slate-11 text-sm">
