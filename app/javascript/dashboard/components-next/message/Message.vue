@@ -145,6 +145,7 @@ const { t } = useI18n();
 const route = useRoute();
 const inboxGetter = useMapGetter('inboxes/getInbox');
 const inbox = computed(() => inboxGetter.value(props.inboxId) || {});
+const getConversationById = useMapGetter('getConversationById');
 const { replaceInstallationName } = useBranding();
 
 /**
@@ -362,7 +363,7 @@ const payloadForContextMenu = computed(() => {
     content: props.content,
     conversation_id: props.conversationId,
     inbox_id: props.inboxId,
-    contact_id: store.getters['getConversationById'](props.conversationId)?.meta?.sender?.id,
+    contact_id: getConversationById.value(props.conversationId)?.meta?.sender?.id,
     attachments: props.attachments,
   };
 });
