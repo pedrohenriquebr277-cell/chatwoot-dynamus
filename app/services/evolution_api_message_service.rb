@@ -1,3 +1,5 @@
+class EvolutionApiError < StandardError; end
+
 class EvolutionApiMessageService
   include HTTParty
 
@@ -14,7 +16,7 @@ class EvolutionApiMessageService
     
     instance_name = resolve_instance_name
     Rails.logger.info "[EvolutionService] Using instance: #{instance_name}"
-    raise StandardError, 'A Caixa de Entrada (Inbox) não tem uma instância Evolution configurada.' if instance_name.blank?
+    raise EvolutionApiError, 'A Caixa de Entrada (Inbox) não tem uma instância Evolution configurada.' if instance_name.blank?
 
     payload = {
       number: format_number_for_evolution(@phone_number),
@@ -33,7 +35,7 @@ class EvolutionApiMessageService
 
     unless response.success?
       Rails.logger.error("Evolution API Error: #{response.body}")
-      raise StandardError, "Falha ao enviar mensagem pela Evolution API: #{response.code}"
+      raise EvolutionApiError, extract_error_message(response)
     end
 
     response.parsed_response
@@ -42,8 +44,8 @@ class EvolutionApiMessageService
   private
 
   def validate_credentials!
-    raise StandardError, 'URL da Evolution API não está configurada no servidor.' if @base_url.blank?
-    raise StandardError, 'API Key da Evolution não está configurada no servidor.' if @api_key.blank?
+    raise EvolutionApiError, 'URL da Evolution API não está configurada no servidor.' if @base_url.blank?
+    raise EvolutionApiError, 'API Key da Evolution não está configurada no servidor.' if @api_key.blank?
   end
 
   def resolve_instance_name
@@ -72,5 +74,27 @@ class EvolutionApiMessageService
   def format_number_for_evolution(phone)
     # Remove qualquer sinal de +, espaços, parênteses ou traços
     phone.to_s.gsub(/[^0-9]/, '')
+  end
+
+  def extract_error_message(response)
+    body = response.body
+    return "Falha ao enviar mensagem pela Evolution API: Código #{response.code}" if body.blank?
+
+    begin
+      parsed = JSON.parse(body)
+      message = if parsed.is_a?(Hash)
+                  parsed['message'] || parsed['error'] || parsed.dig('response', 0, 'message')
+                elsif parsed.is_a?(Array)
+                  parsed.first&.dig('message') || parsed.first&.dig('error')
+                end
+      
+      if message.present?
+        message.is_a?(Array) ? message.join(', ') : message.to_s
+      else
+        "Falha ao enviar mensagem pela Evolution API: Código #{response.code} - #{body}"
+      end
+    rescue JSON::ParserError
+      "Falha ao enviar mensagem pela Evolution API: Código #{response.code} - #{body}"
+    end
   end
 end

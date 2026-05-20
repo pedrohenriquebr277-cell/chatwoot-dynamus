@@ -1,18 +1,15 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useStoreGetters, useStore } from 'dashboard/composables/store';
+import { ref, computed } from 'vue';
+import { useStoreGetters } from 'dashboard/composables/store';
 import { useAlert } from 'dashboard/composables';
 import { useRouter } from 'vue-router';
 import useVuelidate from '@vuelidate/core';
 import { required, minLength } from '@vuelidate/validators';
-
 import NextButton from 'dashboard/components-next/button/Button.vue';
 import evolutionAPI from 'dashboard/api/evolution';
 
 const emit = defineEmits(['close']);
-
 const getters = useStoreGetters();
-const store = useStore();
 const router = useRouter();
 
 const inboxes = computed(() => getters['inboxes/getInboxes'].value);
@@ -28,7 +25,6 @@ const state = ref({
 });
 
 const isSubmitting = ref(false);
-const isWaitingSync = ref(false);
 
 const rules = {
   inboxId: { required },
@@ -42,36 +38,12 @@ const onClose = () => {
   emit('close');
 };
 
-const redirectIfConversationFound = async (contactId, inboxId, retries = 5) => {
-  if (retries <= 0) {
-    isWaitingSync.value = false;
-    useAlert('Mensagem enviada. A conversa aparecerá assim que a Evolution sincronizar o webhook.');
-    onClose();
-    return;
-  }
-
-  try {
-    await store.dispatch('contacts/getConversations', contactId);
-    const conversations = getters['contacts/getContactConversations'].value(contactId);
-    const newConv = conversations.find(c => c.inbox_id === inboxId);
-
-    if (newConv) {
-      isWaitingSync.value = false;
-      onClose();
-      router.push({ name: 'inbox_conversation', params: { inbox_id: inboxId, conversation_id: newConv.id } });
-    } else {
-      setTimeout(() => redirectIfConversationFound(contactId, inboxId, retries - 1), 3000);
-    }
-  } catch (error) {
-    setTimeout(() => redirectIfConversationFound(contactId, inboxId, retries - 1), 3000);
-  }
-};
-
 const submit = async () => {
   v$.value.$touch();
   if (v$.value.$invalid) return;
-
+  
   isSubmitting.value = true;
+  
   try {
     const response = await evolutionAPI.create({
       inbox_id: state.value.inboxId,
@@ -79,22 +51,22 @@ const submit = async () => {
       phone_number: state.value.phoneNumber,
       message: state.value.message,
     });
-
+    
     const data = response.data;
     
+    // Se a conversa foi criada instantaneamente (sem depender do webhook)
     if (data.conversation_id) {
       useAlert('Conversa iniciada com sucesso!');
       onClose();
       router.push({ name: 'inbox_conversation', params: { inbox_id: state.value.inboxId, conversation_id: data.conversation_id } });
-    } else if (data.status === 'sent_waiting_sync' || data.contact_id) {
-      isWaitingSync.value = true;
-      redirectIfConversationFound(data.contact_id, state.value.inboxId);
     } else {
-      useAlert('Mensagem enviada!');
+      // Se caiu na fila de webhook (sent_waiting_sync)
+      useAlert('Mensagem enviada! A conversa aparecerá na sua fila assim que a rede confirmar.');
       onClose();
     }
   } catch (error) {
-    const errorMessage = error?.response?.data?.error || 'Erro ao iniciar conversa. Verifique as configurações da Evolution API.';
+    // Agora o erro real disparado pelo backend (EvolutionApiError) será exibido aqui
+    const errorMessage = error?.response?.data?.error || 'Erro ao iniciar conversa.';
     useAlert(errorMessage);
   } finally {
     isSubmitting.value = false;
@@ -157,14 +129,14 @@ const submit = async () => {
           slate
           type="reset"
           label="Cancelar"
-          :disabled="isSubmitting || isWaitingSync"
+          :disabled="isSubmitting"
           @click.prevent="onClose"
         />
         <NextButton
           type="submit"
-          :label="isWaitingSync ? 'Aguardando Sincronização...' : 'Enviar Mensagem'"
-          :disabled="v$.$invalid || isSubmitting || isWaitingSync"
-          :is-loading="isSubmitting || isWaitingSync"
+          label="Enviar Mensagem"
+          :disabled="v$.$invalid || isSubmitting"
+          :is-loading="isSubmitting"
         />
       </div>
     </form>

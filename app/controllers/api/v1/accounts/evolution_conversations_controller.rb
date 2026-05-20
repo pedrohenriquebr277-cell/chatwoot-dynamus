@@ -4,30 +4,33 @@ class Api::V1::Accounts::EvolutionConversationsController < Api::V1::Accounts::B
   def create
     ActiveRecord::Base.transaction do
       validate_inbox!
-
       @contact = ContactBuilder.new(
         account: Current.account,
         params: contact_params
       ).perform
-
-      EvolutionApiMessageService.new(
-        params[:inbox_id],
-        params[:phone_number],
-        params[:message]
-      ).perform
-
-      # Tenta localizar se a conversa já existe (caso o webhook chegue muito rápido ou já houvesse conversa ativa)
-      @conversation = Current.account.conversations.where(contact_id: @contact.id, inbox_id: params[:inbox_id]).last
-
-      render json: {
-        success: true,
-        contact_id: @contact.id,
-        conversation_id: @conversation&.id,
-        status: @conversation ? 'sent' : 'sent_waiting_sync'
-      }, status: :ok
     end
-  rescue StandardError => e
+
+    EvolutionApiMessageService.new(
+      params[:inbox_id],
+      params[:phone_number],
+      params[:message]
+    ).perform
+
+    # Tenta localizar se a conversa já existe (caso o webhook chegue muito rápido ou já houvesse conversa ativa)
+    @conversation = Current.account.conversations.where(contact_id: @contact.id, inbox_id: params[:inbox_id]).last
+
+    render json: {
+      success: true,
+      contact_id: @contact.id,
+      conversation_id: @conversation&.id,
+      status: @conversation ? 'sent' : 'sent_waiting_sync'
+    }, status: :ok
+
+  rescue EvolutionApiError => e
     render json: { success: false, error: e.message }, status: :unprocessable_entity
+  rescue StandardError => e
+    Rails.logger.error "[EvolutionConversationsController] Internal Server Error: #{e.message}\n#{e.backtrace.join("\n")}"
+    render json: { success: false, error: 'Ocorreu um erro interno no servidor.' }, status: :internal_server_error
   end
 
   private
