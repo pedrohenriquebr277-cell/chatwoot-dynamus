@@ -34,6 +34,7 @@ class ActionCableConnector extends BaseActionCableConnector {
       'conversation.updated': this.onConversationUpdated,
       'account.cache_invalidated': this.onCacheInvalidate,
       'copilot.message.created': this.onCopilotMessageCreated,
+      'inbox.status_updated': this.onInboxStatusUpdated,
     };
   }
 
@@ -220,6 +221,20 @@ class ActionCableConnector extends BaseActionCableConnector {
     this.app.$store.dispatch('labels/revalidate', { newKey: keys.label });
     this.app.$store.dispatch('inboxes/revalidate', { newKey: keys.inbox });
     this.app.$store.dispatch('teams/revalidate', { newKey: keys.team });
+  };
+
+  onInboxStatusUpdated = data => {
+    const inbox = this.app.$store.getters['inboxes/getInbox'](data.id);
+    if (inbox && inbox.id) {
+      const updatedInbox = {
+        ...inbox,
+        csat_config: {
+          ...(inbox.csat_config || {}),
+          evolution_status: data.evolution_status,
+        },
+      };
+      this.app.$store.commit('inboxes/EDIT_INBOXES', updatedInbox);
+    }
   };
 }
 

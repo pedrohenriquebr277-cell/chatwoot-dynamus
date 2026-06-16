@@ -102,6 +102,20 @@ const getters = {
       return isUnAssigned && shouldFilter;
     });
   },
+  getUnreadChats: (_state, _, __, rootGetters) => activeFilters => {
+    const currentUser = rootGetters.getCurrentUser;
+    const currentUserId = rootGetters.getCurrentUser.id;
+    const currentAccountId = rootGetters.getCurrentAccountId;
+    const permissions = getUserPermissions(currentUser, currentAccountId);
+    const userRole = getUserRole(currentUser, currentAccountId);
+
+    return _state.allConversations.filter(conversation => {
+      const isUnread = !conversation.agent_last_seen_at || conversation.last_activity_at > conversation.agent_last_seen_at;
+      const shouldFilter = applyPageFilters(conversation, activeFilters);
+      const allowedForRole = applyRoleFilter(conversation, userRole, permissions, currentUserId);
+      return isUnread && shouldFilter && allowedForRole;
+    });
+  },
   getParticipatingChats: (_state, _, __, rootGetters) => activeFilters => {
     const currentUserId = rootGetters.getCurrentUser?.id;
     const getWatchers = rootGetters['conversationWatchers/getByConversationId'];

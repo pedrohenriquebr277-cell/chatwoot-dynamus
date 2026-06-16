@@ -28,17 +28,10 @@ class Messages::MessageBuilder
     # The frontend is equipped to handle this case
     process_email_content
     @message.save!
-    mark_conversation_as_read_if_outgoing!
     @message
   end
 
   private
-
-  def mark_conversation_as_read_if_outgoing!
-    return unless @message.outgoing? || @message.template?
-
-    @conversation.update!(unread_count: 0)
-  end
 
   # Extracts content attributes from the given params.
   # - Converts ActionController::Parameters to a regular hash if needed.

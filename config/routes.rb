@@ -378,6 +378,11 @@ Rails.application.routes.draw do
       # end of account scoped api routes
       # ----------------------------------
 
+      resources :inboxes, only: [] do
+        post :connection_status, on: :member
+        post :bulk_connection_status, on: :collection
+      end
+
       namespace :integrations do
         resources :webhooks, only: [:create]
       end

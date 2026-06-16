@@ -135,6 +135,7 @@ class Message < ApplicationRecord
   has_one :csat_survey_response, dependent: :destroy_async
   has_many :notifications, as: :primary_actor, dependent: :destroy_async
 
+  after_create :clear_conversation_unread_count_if_outgoing
   after_create_commit :execute_after_create_commit_callbacks
 
   after_update_commit :dispatch_update_event
@@ -285,6 +286,17 @@ class Message < ApplicationRecord
   end
 
   private
+
+  def clear_conversation_unread_count_if_outgoing
+    return unless outgoing? || template?
+
+    # Chatwoot calcula o unread_count internamente baseado no agent_last_seen_at.
+    # Ao atualizar este timestamp para Time.now.utc, o unread_count automaticamente zera.
+    conversation.update(agent_last_seen_at: Time.now.utc)
+
+    # Dispara evento para atualizar a listagem de conversas na interface imediatamente
+    Rails.configuration.dispatcher.dispatch(CONVERSATION_UPDATED, Time.zone.now, conversation: conversation)
+  end
 
   def intercept_evolution_api_status
     # Apenas canais de API (Evolution)

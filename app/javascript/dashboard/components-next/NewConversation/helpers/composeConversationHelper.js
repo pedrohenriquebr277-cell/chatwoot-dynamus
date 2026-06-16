@@ -215,13 +215,39 @@ export const createContactSearcher = () => {
   };
 };
 
+// Detects phone numbers in formats like: +55 (41) 98864-7010, 5541988647010,
+// (41) 98864-7010, 41 9 8864-7010, 55-41-98864-7010, etc.
+const PHONE_NUMBER_REGEX = /^[+]?[\d\s\-(). ]{7,20}$/;
+
+const sanitizePhoneNumber = raw => {
+  // Remove tudo que não é número
+  let digits = raw.replace(/\D/g, '');
+  
+  // Se o operador digitou apenas DDD + Número (10 ou 11 dígitos), injeta o DDI do Brasil (55)
+  if (digits.length === 10 || digits.length === 11) {
+    digits = '55' + digits;
+  }
+  
+  // Força o '+' obrigatório do padrão E.164 exigido pelo Chatwoot e Evolution
+  return `+${digits}`;
+};
 export const createNewContact = async input => {
-  const payload = {
-    name: input.startsWith('+')
-      ? input.slice(1) // Remove the '+' prefix if it exists
-      : getCapitalizedNameFromEmail(input),
-    ...(input.startsWith('+') ? { phone_number: input } : { email: input }),
-  };
+  const trimmed = input.trim();
+  const isPhone = PHONE_NUMBER_REGEX.test(trimmed);
+
+  let payload;
+  if (isPhone) {
+    const sanitized = sanitizePhoneNumber(trimmed);
+    payload = {
+      name: sanitized,
+      phone_number: sanitized,
+    };
+  } else {
+    payload = {
+      name: getCapitalizedNameFromEmail(trimmed),
+      email: trimmed,
+    };
+  }
 
   const {
     data: {
