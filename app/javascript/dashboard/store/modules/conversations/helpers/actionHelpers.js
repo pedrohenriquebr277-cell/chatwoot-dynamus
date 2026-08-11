@@ -1,5 +1,9 @@
 import types from '../../../mutation-types';
 
+// Must match the backend ENV value CONVERSATION_RESULTS_PER_PAGE (default: 25).
+// When the API returns fewer conversations than a full page, we know the list is exhausted.
+const CONVERSATIONS_PER_PAGE = 25;
+
 export const setPageFilter = ({ dispatch, filter, page, markEndReached }) => {
   dispatch('conversationPage/setCurrentPage', { filter, page }, { root: true });
   if (markEndReached) {
@@ -65,6 +69,6 @@ export const buildConversationList = (
     dispatch: context.dispatch,
     filter: filterType,
     page: requestPayload.page,
-    markEndReached: !conversationList.length,
+    markEndReached: conversationList.length < CONVERSATIONS_PER_PAGE,
   });
 };

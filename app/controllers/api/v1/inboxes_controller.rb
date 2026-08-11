@@ -32,7 +32,7 @@ class Api::V1::InboxesController < Api::BaseController
       end
     end
 
-    head :ok
+    render json: { success: true, message: 'Status das inboxes atualizado com sucesso' }, status: :ok
   end
 
   private
